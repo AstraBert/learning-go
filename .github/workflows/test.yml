@@ -1,0 +1,46 @@
+name: Run Go Tests
+
+on:
+  push:
+    branches:
+      - main  # Or any other branch you want to trigger on
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        exercise_dir: ${{ fromJson(steps.create_matrix.outputs.matrix_json) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.18'  # Or your desired Go version
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Find Go exercise directories
+        id: find_exercises
+        run: |
+          EXERCISE_DIRS=$(find . -maxdepth 1 -type d -not -path "." -not -path "./.git" -print0 | xargs -0 -n 1 basename)
+          echo "exercise_dirs=$EXERCISE_DIRS" >> $GITHUB_OUTPUT
+          
+      - name: Create matrix values
+        id: create_matrix
+        run: |
+          EXERCISE_DIRS=$(find . -maxdepth 1 -type d -not -path "." -not -path "./.git" -print0 | xargs -0 -n 1 basename)
+          MATRIX_JSON=$(echo "$EXERCISE_DIRS" | jq -R -s 'split("\n")[:-1]')
+          echo "matrix_json=$MATRIX_JSON" >> $GITHUB_OUTPUT
+
+      - name: Run tests for ${{ matrix.exercise_dir }}
+        working-directory: ${{ matrix.exercise_dir }}
+        run: go test
