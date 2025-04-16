@@ -10,20 +10,35 @@ type Resident struct {
 
 // NewResident registers a new resident in this city.
 func NewResident(name string, age int, address map[string]string) *Resident {
-	panic("Please implement NewResident.")
+	return &Resident{Name: name, Age: age, Address: address}
 }
 
 // HasRequiredInfo determines if a given resident has all of the required information.
 func (r *Resident) HasRequiredInfo() bool {
-	panic("Please implement HasRequiredInfo.")
+	if r.Address["street"] == "" || r.Name == "" {
+		return false
+	} else {
+		return true
+	}
 }
 
 // Delete deletes a resident's information.
 func (r *Resident) Delete() {
-	panic("Please implement Delete.")
+	var name string
+	var age int 
+	var address map[string]string
+	r.Name = name
+	r.Age = age
+	r.Address = address
 }
 
 // Count counts all residents that have provided the required information.
 func Count(residents []*Resident) int {
-	panic("Please implement Count.")
+	counter := 0
+	for _,x := range residents {
+		if x.HasRequiredInfo(){
+			counter++
+		}
+	}
+	return counter
 }
