@@ -1,0 +1,46 @@
+package phonenumber
+
+import (
+	"strings"
+	"errors"
+	"fmt"
+)
+
+func Number(phoneNumber string) (string, error) {
+	newPhone := ""
+	for _,x := range phoneNumber {
+		fmt.Println(string(x))
+		if strings.ContainsAny(string(x), "0123456789") {
+			newPhone+=string(x)
+		}
+	}
+	fmt.Println(newPhone)
+	if len(newPhone) < 10 || len(newPhone) > 11 {
+		return "", errors.New("This is not a valid NANP telephone number")
+	}
+	if len(newPhone) == 11 {
+		if newPhone[0] != 1 {
+			return "", errors.New("Phone number cannot have a prefix different from 1")
+		}
+		return newPhone[1:], nil
+	} 
+	return newPhone, nil
+}
+
+func AreaCode(phoneNumber string) (string, error) {
+	newPhone, err := Number(phoneNumber)
+	if err == nil {
+		return newPhone[:3], nil
+	} else {
+		return "", err
+	}
+}
+
+func Format(phoneNumber string) (string, error) {
+	newPhone, err := Number(phoneNumber)
+	if err == nil {
+		return fmt.Sprintf("(%s) %s-%s", newPhone[:3], newPhone[3:6], newPhone[6:]), nil
+	} else {
+		return "", err
+	}
+}
