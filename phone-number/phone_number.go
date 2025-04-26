@@ -9,22 +9,26 @@ import (
 func Number(phoneNumber string) (string, error) {
 	newPhone := ""
 	for _,x := range phoneNumber {
-		fmt.Println(string(x))
 		if strings.ContainsAny(string(x), "0123456789") {
 			newPhone+=string(x)
 		}
 	}
-	fmt.Println(newPhone)
 	if len(newPhone) < 10 || len(newPhone) > 11 {
 		return "", errors.New("This is not a valid NANP telephone number")
-	}
-	if len(newPhone) == 11 {
-		if newPhone[0] != 1 {
+	} else if len(newPhone) == 11 {
+		if string([]byte{newPhone[0]}) != "1" {
 			return "", errors.New("Phone number cannot have a prefix different from 1")
 		}
+		if string([]byte{newPhone[1]}) == "0" || string([]byte{newPhone[1]}) == "1" || string([]byte{newPhone[4]}) == "0" || string([]byte{newPhone[4]}) == "1" {
+			return "", errors.New("This is not a valid NANP telephone number")
+		}
 		return newPhone[1:], nil
-	} 
-	return newPhone, nil
+	} else {
+		if string([]byte{newPhone[0]}) == "0" || string([]byte{newPhone[0]}) == "1" || string([]byte{newPhone[3]}) == "0" || string([]byte{newPhone[3]}) == "1" {
+			return "", errors.New("This is not a valid NANP telephone number")
+		}
+		return newPhone, nil
+	}
 }
 
 func AreaCode(phoneNumber string) (string, error) {
