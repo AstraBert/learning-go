@@ -1,42 +1,60 @@
 package cryptosquare
 
 import (
-	"strings"
 	"math"
+	"strings"
+	"unicode"
 )
 
-var punctuation = []string{
-	"!", "\"", "#", "$", "%", "&", "(", ")", "*", "+", ",", "-", ".", "/", 
-	":", ";", "<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "`", 
-	"{", "|", "}", "~", "'",
-}
-
 func NoPunctuation(s string) string {
-	for _,r := range punctuation {
-		s = strings.ReplaceAll(s, r, "")
+	var b strings.Builder
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			b.WriteRune(unicode.ToLower(r))
+		}
 	}
-	return s
+	return b.String()
 }
 
 func FindRectangle(n int) (int, int) {
-	if int(math.Sqrt(float64(n)))*int(math.Sqrt(float64(n))) == n {
-		return int(math.Sqrt(float64(n))),int(math.Sqrt(float64(n)))
+	sqrt := int(math.Sqrt(float64(n)))
+	for r := sqrt; r <= n; r++ {
+		c := (n + r - 1) / r // ceiling
+		if c >= r && c-r <= 1 {
+			return r, c
+		}
 	}
-	r := int(math.Sqrt(float64(n)))
-	c := r+1
-	for i:=1;i>0;i++{
-		if r*c >= n && c >= r && (c-r)<=1 {
-			return r,c
-		} 
-		r+=1
-		c+=1
-	}
-	return r,c
+	return 0, 0 // Should never happen
 }
 
 func Encode(pt string) string {
 	pt = NoPunctuation(pt)
-	pt = strings.Join("",strings.Fields(pt))
-	r,c := FindRectangle(len(pt))	
-	// unfinished
+	n := len(pt)
+	if n == 0 {
+		return ""
+	}
+
+	r, c := FindRectangle(n)
+	// Fill rows
+	rows := make([]string, c)
+	for i := 0; i < n; i++ {
+		rows[i/c] += string(pt[i])
+	}
+	// Make sure all rows are exactly length c
+	for i := range rows {
+		if len(rows[i]) < c {
+			rows[i] += strings.Repeat(" ", c-len(rows[i]))
+		}
+	}
+
+	// Transpose to columns
+	cols := make([]string, c)
+	for col := 0; col < c; col++ {
+		for row := 0; row < r; row++ {
+			cols[col] += string(rows[row][col])
+		}
+	}
+
+	// Join with space
+	return strings.Join(cols, " ")
 }
